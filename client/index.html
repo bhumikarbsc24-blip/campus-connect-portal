@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -7,6 +8,72 @@
     <title>Campus Connect Portal | Home</title>
 
     <link rel="stylesheet" href="./src/style.css">
+
+    <style>
+        .club-form {
+            margin-top: 25px;
+            padding: 25px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #d5dce8;
+        }
+
+        .club-form input {
+            padding: 12px;
+            margin: 8px 5px 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 250px;
+            max-width: 90%;
+        }
+
+        .club-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px #d5dce8;
+            border-top: 4px solid #123c69;
+        }
+
+        .club-card h3 {
+            color: #123c69;
+        }
+
+        .club-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .club-actions button {
+            padding: 9px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .view-btn {
+            background: #123c69;
+            color: white;
+        }
+
+        .edit-btn {
+            background: #f2a900;
+            color: #123c69;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        #clubMessage {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,10 +82,7 @@
     <header class="navbar">
 
         <div class="logo-group">
-
-            <div class="brand-badge">
-                RV
-            </div>
+            <div class="brand-badge">RV</div>
 
             <div>
                 <span class="university-name">
@@ -29,17 +93,11 @@
                     School of Computer Science & Engineering
                 </p>
             </div>
-
         </div>
 
         <div class="nav-actions">
-            <a href="login.html" class="btn-secondary">
-                Login
-            </a>
-
-            <a href="login.html#register" class="btn-primary">
-                Register
-            </a>
+            <a href="login.html" class="btn-secondary">Login</a>
+            <a href="login.html#register" class="btn-primary">Register</a>
         </div>
 
     </header>
@@ -54,9 +112,7 @@
                 CS3301 - FULL STACK DEVELOPMENT
             </span>
 
-            <h1>
-                CAMPUS CONNECT PORTAL
-            </h1>
+            <h1>CAMPUS CONNECT PORTAL</h1>
 
             <p class="subtitle">
                 Connecting Students, Faculty, and Administrators on a Single Digital Platform.
@@ -84,24 +140,16 @@
             Experience academic management simplified through modern technology.
         </p>
 
-
         <div class="carousel-wrapper">
 
-            <button
-                class="carousel-btn prev-btn"
-                id="prevBtn"
-                aria-label="Previous slide">
-                &#10094;
-            </button>
-
+            <button class="carousel-btn prev-btn" id="prevBtn"
+                aria-label="Previous slide">&#10094;</button>
 
             <div class="carousel-track-container">
 
                 <div class="carousel-track" id="carouselTrack">
 
-                    <!-- Slide 1 -->
                     <div class="slide active-slide">
-
                         <img
                             src="https://d2b6aloc836m7p.cloudfront.net/wp-content/uploads/2025/10/Reflection.jpg"
                             alt="University Campus">
@@ -109,13 +157,9 @@
                         <div class="slide-caption">
                             Modern University Infrastructure
                         </div>
-
                     </div>
 
-
-                    <!-- Slide 2 -->
                     <div class="slide">
-
                         <img
                             src="https://d2b6aloc836m7p.cloudfront.net/wp-content/uploads/2025/10/Reflection.jpg"
                             alt="Student Collaboration">
@@ -123,13 +167,9 @@
                         <div class="slide-caption">
                             Collaborative Learning & Hackathons
                         </div>
-
                     </div>
 
-
-                    <!-- Slide 3 -->
                     <div class="slide">
-
                         <img
                             src="https://d2b6aloc836m7p.cloudfront.net/wp-content/uploads/2025/10/Reflection.jpg"
                             alt="Digital Dashboard">
@@ -137,42 +177,21 @@
                         <div class="slide-caption">
                             Real-Time Academic Management
                         </div>
-
                     </div>
 
                 </div>
 
             </div>
 
-
-            <button
-                class="carousel-btn next-btn"
-                id="nextBtn"
-                aria-label="Next slide">
-                &#10095;
-            </button>
+            <button class="carousel-btn next-btn" id="nextBtn"
+                aria-label="Next slide">&#10095;</button>
 
         </div>
 
-
-        <!-- Slide Indicators -->
         <div class="carousel-dots" id="carouselDots">
-
-            <span
-                class="dot active-dot"
-                data-index="0">
-            </span>
-
-            <span
-                class="dot"
-                data-index="1">
-            </span>
-
-            <span
-                class="dot"
-                data-index="2">
-            </span>
-
+            <span class="dot active-dot" data-index="0"></span>
+            <span class="dot" data-index="1"></span>
+            <span class="dot" data-index="2"></span>
         </div>
 
     </section>
@@ -185,101 +204,456 @@
             Choose Your Portal View
         </h2>
 
-
         <div class="roles-grid">
 
-
-            <!-- Student Card -->
             <article class="role-card student-border">
-
-                <div class="role-icon">
-                    👨‍🎓
-                </div>
-
-                <h3>
-                    Student Portal
-                </h3>
+                <div class="role-icon">👨‍🎓</div>
+                <h3>Student Portal</h3>
 
                 <ul class="feature-bullets">
-
                     <li>• View Notices & Events</li>
                     <li>• Submit Assignments</li>
                     <li>• Track Attendance</li>
                     <li>• Update Profile</li>
-
                 </ul>
 
-                <button class="btn-portal student-bg" onclick="window.location.href='login.html'">
+                <button class="btn-portal student-bg"
+                    onclick="window.location.href='login.html'">
                     Access Student View
                 </button>
-
             </article>
 
 
-            <!-- Faculty Card -->
             <article class="role-card faculty-border">
-
-                <div class="role-icon">
-                    👨‍🏫
-                </div>
-
-                <h3>
-                    Faculty Portal
-                </h3>
+                <div class="role-icon">👨‍🏫</div>
+                <h3>Faculty Portal</h3>
 
                 <ul class="feature-bullets">
-
                     <li>• Post Notices & Events</li>
                     <li>• Create Assignments</li>
                     <li>• Mark Attendance</li>
                     <li>• View Submissions</li>
-
                 </ul>
 
-                <button class="btn-portal faculty-bg" onclick="window.location.href='login.html'">
+                <button class="btn-portal faculty-bg"
+                    onclick="window.location.href='login.html'">
                     Access Faculty View
                 </button>
-
             </article>
 
 
-            <!-- Admin Card -->
             <article class="role-card admin-border">
-
-                <div class="role-icon">
-                    🛡️
-                </div>
-
-                <h3>
-                    Admin Portal
-                </h3>
+                <div class="role-icon">🛡️</div>
+                <h3>Admin Portal</h3>
 
                 <ul class="feature-bullets">
-
                     <li>• Manage Users</li>
                     <li>• Manage Notices & Events</li>
                     <li>• View System Reports</li>
                     <li>• System Settings</li>
-
                 </ul>
 
-                <button class="btn-portal admin-bg" onclick="window.location.href='login.html'">
+                <button class="btn-portal admin-bg"
+                    onclick="window.location.href='login.html'">
                     Access Admin View
                 </button>
-
             </article>
-
 
         </div>
 
     </section>
-  <section id="auth">
-      <div id="auth-root"></div>
-  </section>
 
-    
+
+    <!-- College Clubs Section -->
+    <section id="clubs" class="section-container">
+
+        <h2 class="section-title">
+            Explore College Clubs
+        </h2>
+
+        <p class="section-subtitle">
+            Discover different clubs and connect with your interests.
+        </p>
+
+        <!-- Clubs Display -->
+        <div class="roles-grid" id="clubList">
+            Loading clubs...
+        </div>
+
+        <!-- Add Club Form -->
+        <div class="club-form">
+
+            <h2>Add a New Club</h2>
+
+            <input
+                type="text"
+                id="clubName"
+                placeholder="Enter club name">
+
+            <input
+                type="text"
+                id="clubDescription"
+                placeholder="Enter club description">
+
+            <button class="btn-primary" onclick="addClub()">
+                Add Club
+            </button>
+
+            <p id="clubMessage"></p>
+
+        </div>
+
+    </section>
+
+
+    <!-- React App Root -->
+    <section id="auth" style="padding: 20px 0;">
+        <div id="auth-root"></div>
+    </section>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+
+        <p>
+            &copy; 2026 RV University - School of Computer Science & Engineering.
+            All Rights Reserved.
+        </p>
+
+        <p>
+            Campus Connect Portal | Full Stack Development Lab
+        </p>
+
+    </footer>
+
+
+    <!-- Carousel Functionality -->
+    <script>
+
+        const track = document.getElementById('carouselTrack');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const dots = document.querySelectorAll('.dot');
+
+        let currentSlide = 0;
+
+        const totalSlides = document.querySelectorAll('.slide').length;
+
+        function updateCarousel(index) {
+
+            currentSlide = (index + totalSlides) % totalSlides;
+
+            if (track) {
+                track.style.transform =
+                    `translateX(-${currentSlide * 100}%)`;
+            }
+
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle(
+                    'active-dot',
+                    idx === currentSlide
+                );
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                updateCarousel(currentSlide - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                updateCarousel(currentSlide + 1);
+            });
+        }
+
+        dots.forEach((dot, idx) => {
+            dot.addEventListener('click', () => {
+                updateCarousel(idx);
+            });
+        });
+
+    </script>
+
+
+    <!-- Backend CRUD API Integration -->
+    <script>
+
+        const API_URL = "http://localhost:5000/clubs";
+
+        // GET: Load all clubs
+        async function loadClubs() {
+
+            const clubList = document.getElementById("clubList");
+
+            try {
+
+                const response = await fetch(API_URL);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch clubs");
+                }
+
+                const clubs = await response.json();
+
+                clubList.innerHTML = "";
+
+                if (!Array.isArray(clubs) || clubs.length === 0) {
+                    clubList.innerHTML = "<p>No clubs available.</p>";
+                    return;
+                }
+
+                clubs.forEach(club => {
+
+                    // Skip invalid entries
+                    if (!club || club.id == null || !club.name || !club.description) {
+                        return;
+                    }
+
+                    const card = document.createElement("article");
+                    card.className = "club-card";
+
+                    const heading = document.createElement("h3");
+                    heading.textContent = club.name;
+
+                    const description = document.createElement("p");
+                    description.textContent = club.description;
+
+                    const actions = document.createElement("div");
+                    actions.className = "club-actions";
+
+                    const viewButton = document.createElement("button");
+                    viewButton.className = "view-btn";
+                    viewButton.textContent = "View";
+                    viewButton.onclick = () => viewClub(club.id);
+
+                    const editButton = document.createElement("button");
+                    editButton.className = "edit-btn";
+                    editButton.textContent = "Edit";
+                    editButton.onclick = () => editClub(club.id);
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.className = "delete-btn";
+                    deleteButton.textContent = "Delete";
+                    deleteButton.onclick = () => deleteClub(club.id);
+
+                    actions.appendChild(viewButton);
+                    actions.appendChild(editButton);
+                    actions.appendChild(deleteButton);
+
+                    card.appendChild(heading);
+                    card.appendChild(description);
+                    card.appendChild(actions);
+
+                    clubList.appendChild(card);
+
+                });
+
+                if (clubList.children.length === 0) {
+                    clubList.innerHTML = "<p>No valid clubs available.</p>";
+                }
+
+            } catch (error) {
+
+                clubList.innerText =
+                    "Unable to load clubs. Please start the backend server.";
+
+                console.error(error);
+
+            }
+
+        }
+
+
+        // POST: Add a new club
+        async function addClub() {
+
+            const name = document.getElementById("clubName").value.trim();
+
+            const description =
+                document.getElementById("clubDescription").value.trim();
+
+            const message = document.getElementById("clubMessage");
+
+            if (!name || !description) {
+                message.innerText =
+                    "Please enter both club name and description.";
+                return;
+            }
+
+            try {
+
+                const response = await fetch(API_URL, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name: name,
+                        description: description
+                    })
+
+                });
+
+                if (!response.ok) {
+                    throw new Error("Unable to add club");
+                }
+
+                message.innerText = "Club added successfully!";
+
+                document.getElementById("clubName").value = "";
+                document.getElementById("clubDescription").value = "";
+
+                await loadClubs();
+
+            } catch (error) {
+
+                message.innerText = "Error adding club. Please try again.";
+                console.error(error);
+
+            }
+
+        }
+
+
+        // GET: View one club
+        async function viewClub(id) {
+
+            try {
+
+                const response = await fetch(`${API_URL}/${id}`);
+
+                if (!response.ok) {
+                    throw new Error("Club not found");
+                }
+
+                const club = await response.json();
+
+                alert(
+                    "Club Details\n\n" +
+                    "Name: " + club.name + "\n" +
+                    "Description: " + club.description
+                );
+
+            } catch (error) {
+
+                alert("Unable to view club details.");
+                console.error(error);
+
+            }
+
+        }
+
+
+        // PUT: Edit an existing club
+        async function editClub(id) {
+
+            try {
+
+                const response = await fetch(`${API_URL}/${id}`);
+
+                if (!response.ok) {
+                    throw new Error("Club not found");
+                }
+
+                const club = await response.json();
+
+                const newName = prompt("Enter updated club name:", club.name);
+
+                if (newName === null) return;
+
+                const newDescription = prompt(
+                    "Enter updated club description:",
+                    club.description
+                );
+
+                if (newDescription === null) return;
+
+                if (!newName.trim() || !newDescription.trim()) {
+                    alert("Club name and description cannot be empty.");
+                    return;
+                }
+
+                const updateResponse = await fetch(`${API_URL}/${id}`, {
+
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        name: newName.trim(),
+                        description: newDescription.trim()
+                    })
+
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error("Unable to update club");
+                }
+
+                alert("Club updated successfully!");
+
+                await loadClubs();
+
+            } catch (error) {
+
+                alert("Error updating club.");
+                console.error(error);
+
+            }
+
+        }
+
+
+        // DELETE: Remove a club
+        async function deleteClub(id) {
+
+            const confirmed = confirm(
+                "Are you sure you want to delete this club?"
+            );
+
+            if (!confirmed) return;
+
+            try {
+
+                const response = await fetch(`${API_URL}/${id}`, {
+
+                    method: "DELETE"
+
+                });
+
+                if (!response.ok) {
+                    throw new Error("Unable to delete club");
+                }
+
+                alert("Club deleted successfully!");
+
+                await loadClubs();
+
+            } catch (error) {
+
+                alert("Error deleting club.");
+                console.error(error);
+
+            }
+
+        }
+
+
+        // Load clubs when website opens
+        loadClubs();
+
+    </script>
+
+
+    <!-- Existing React Application -->
     <script type="module" src="./src/main.jsx"></script>
 
 </body>
-
 </html>
