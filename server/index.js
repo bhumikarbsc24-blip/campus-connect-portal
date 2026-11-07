@@ -1,4 +1,9 @@
 
+import dns from 'node:dns';
+
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -7,7 +12,7 @@ import Notice from './models/Notice.js';
 import Assignment from './models/Assignment.js';
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
@@ -28,10 +33,12 @@ let clubs = [
     { id: 2, name: "Music Club", description: "A club for music lovers" }
 ];
 
+// GET all clubs
 app.get('/clubs', (req, res) => {
     res.json(clubs);
 });
 
+// GET club by ID
 app.get('/clubs/:id', (req, res) => {
     const club = clubs.find(c => c.id === Number(req.params.id));
 
@@ -42,6 +49,7 @@ app.get('/clubs/:id', (req, res) => {
     res.json(club);
 });
 
+// POST - Add new club
 app.post('/clubs', (req, res) => {
     const newClub = {
         id: Date.now(),
@@ -53,6 +61,7 @@ app.post('/clubs', (req, res) => {
     res.status(201).json(newClub);
 });
 
+// PUT - Update club
 app.put('/clubs/:id', (req, res) => {
     const club = clubs.find(c => c.id === Number(req.params.id));
 
@@ -66,8 +75,15 @@ app.put('/clubs/:id', (req, res) => {
     res.json(club);
 });
 
+// DELETE club
 app.delete('/clubs/:id', (req, res) => {
     const id = Number(req.params.id);
+    const exists = clubs.some(c => c.id === id);
+
+    if (!exists) {
+        return res.status(404).json({ message: "Club not found" });
+    }
+
     clubs = clubs.filter(c => c.id !== id);
 
     res.json({ message: "Club deleted successfully" });
@@ -270,15 +286,24 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Connect MongoDB and start server
-mongoose.connect('mongodb://127.0.0.1:27017/collegeDB')
+// =====================================
+// MONGODB ATLAS CONNECTION
+// =====================================
+
+if (!process.env.MONGO_URI) {
+    console.error('MONGO_URI is missing from environment variables');
+    process.exit(1);
+}
+
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log('MongoDB connected successfully!');
+        console.log('MongoDB Atlas connected successfully!');
 
         app.listen(PORT, () => {
-            console.log(`Server running at http://localhost:${PORT}`);
+            console.log(`Server running on port ${PORT}`);
         });
     })
     .catch((error) => {
         console.error('MongoDB connection failed:', error.message);
+        process.exit(1);
     });
