@@ -1,422 +1,762 @@
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
-// Deployed Render Backend URL
 const API_URL = 'https://campus-connect-portal-2205.onrender.com/api';
 
 export default function StudentPortal({ onBackToHome }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [activeTab, setActiveTab] = useState('notices');
 
   const [notices, setNotices] = useState([]);
   const [assignments, setAssignments] = useState([]);
 
-  const [loadingNotices, setLoadingNotices] = useState(true);
-  const [loadingAssignments, setLoadingAssignments] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [noticeError, setNoticeError] = useState('');
-  const [assignmentError, setAssignmentError] = useState('');
+  const [showNoticeForm, setShowNoticeForm] = useState(false);
+  const [showAssignmentForm, setShowAssignmentForm] = useState(false);
 
-  // Fetch notices from MongoDB Atlas
+  const [noticeForm, setNoticeForm] = useState({
+    title: '',
+    description: '',
+    department: '',
+    date: ''
+  });
+
+  const [assignmentForm, setAssignmentForm] = useState({
+    title: '',
+    subject: '',
+    description: '',
+    dueDate: ''
+  });
+
+  const [saving, setSaving] = useState(false);
+
+  // Fetch notices
+  const fetchNotices = async () => {
+    const response = await fetch(`${API_URL}/notices`);
+
+    if (!response.ok) {
+      throw new Error('Unable to fetch notices');
+    }
+
+    return response.json();
+  };
+
+  // Fetch assignments
+  const fetchAssignments = async () => {
+    const response = await fetch(`${API_URL}/assignments`);
+
+    if (!response.ok) {
+      throw new Error('Unable to fetch assignments');
+    }
+
+    return response.json();
+  };
+
+  // Load portal data
   useEffect(() => {
-    const fetchNotices = async () => {
+    let cancelled = false;
+
+    const loadData = async () => {
       try {
-        const response = await fetch(`${API_URL}/notices`);
+        const [noticeData, assignmentData] = await Promise.all([
+          fetchNotices(),
+          fetchAssignments()
+        ]);
 
-        if (!response.ok) {
-          throw new Error('Unable to load notices');
+        if (!cancelled) {
+          setNotices(noticeData);
+          setAssignments(assignmentData);
+          setError('');
         }
-
-        const data = await response.json();
-        setNotices(data);
-      } catch (error) {
-        setNoticeError(error.message);
+      } catch {
+        if (!cancelled) {
+          setError(
+            'Unable to load data. Please check your internet connection and try again.'
+          );
+        }
       } finally {
-        setLoadingNotices(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchNotices();
-  }, []);
+    loadData();
 
-  // Fetch assignments from MongoDB Atlas
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        const response = await fetch(`${API_URL}/assignments`);
-
-        if (!response.ok) {
-          throw new Error('Unable to load assignments');
-        }
-
-        const data = await response.json();
-        setAssignments(data);
-      } catch (error) {
-        setAssignmentError(error.message);
-      } finally {
-        setLoadingAssignments(false);
-      }
+    return () => {
+      cancelled = true;
     };
-
-    fetchAssignments();
   }, []);
 
-  // Submit assignment and update MongoDB
-  const handleAssignmentSubmit = async (id) => {
+  // Add notice
+  const handleAddNotice = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const response = await fetch(`${API_URL}/notices`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(noticeForm)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add notice');
+      }
+
+      const newNotice = await response.json();
+
+      setNotices((prev) => [...prev, newNotice]);
+
+      setNoticeForm({
+        title: '',
+        description: '',
+        department: '',
+        date: ''
+      });
+
+      setShowNoticeForm(false);
+      alert('Notice added successfully!');
+    } catch {
+      alert('Unable to add notice. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Delete notice
+  const handleDeleteNotice = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this notice?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/notices/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete notice');
+      }
+
+      setNotices((prev) => prev.filter((notice) => notice._id !== id));
+      alert('Notice deleted successfully!');
+    } catch {
+      alert('Unable to delete notice.');
+    }
+  };
+
+  // Add assignment
+  const handleAddAssignment = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const response = await fetch(`${API_URL}/assignments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(assignmentForm)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add assignment');
+      }
+
+      const newAssignment = await response.json();
+
+      setAssignments((prev) => [...prev, newAssignment]);
+
+      setAssignmentForm({
+        title: '',
+        subject: '',
+        description: '',
+        dueDate: ''
+      });
+
+      setShowAssignmentForm(false);
+      alert('Assignment added successfully!');
+    } catch {
+      alert('Unable to add assignment. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Submit assignment
+  const handleSubmitAssignment = async (id) => {
     try {
       const response = await fetch(
         `${API_URL}/assignments/${id}/submit`,
         {
-          method: 'PUT'
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
       );
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.message || 'Submission failed');
+        throw new Error('Failed to submit assignment');
       }
 
-      setAssignments((previous) =>
-        previous.map((item) =>
-          item._id === id ? data : item
+      const updatedAssignment = await response.json();
+
+      setAssignments((prev) =>
+        prev.map((assignment) =>
+          assignment._id === id
+            ? {
+                ...assignment,
+                ...updatedAssignment,
+                status: 'Submitted'
+              }
+            : assignment
         )
       );
 
       alert('Assignment submitted successfully!');
-    } catch (error) {
-      alert(error.message);
+    } catch {
+      alert('Unable to submit assignment.');
     }
   };
 
-  // Select current tab
-  const currentPath = location.pathname;
+  // Delete assignment
+  const handleDeleteAssignment = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this assignment?')) {
+      return;
+    }
 
-  const activePage = currentPath.includes('/assignments')
-    ? 'assignments'
-    : currentPath.includes('/attendance')
-    ? 'attendance'
-    : currentPath.includes('/profile')
-    ? 'profile'
-    : 'notices';
+    try {
+      const response = await fetch(`${API_URL}/assignments/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete assignment');
+      }
+
+      setAssignments((prev) =>
+        prev.filter((assignment) => assignment._id !== id)
+      );
+
+      alert('Assignment deleted successfully!');
+    } catch {
+      alert('Unable to delete assignment.');
+    }
+  };
+
+  // Styles
+  const styles = {
+    page: {
+      minHeight: '100vh',
+      background: '#f4f6fb',
+      padding: '30px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#24304a'
+    },
+    container: {
+      maxWidth: '1100px',
+      margin: '0 auto'
+    },
+    header: {
+      background: '#172554',
+      color: 'white',
+      padding: '30px',
+      borderRadius: '14px',
+      marginBottom: '25px'
+    },
+    heading: {
+      margin: '0 0 10px',
+      fontSize: '28px'
+    },
+    subtitle: {
+      margin: 0,
+      color: '#dbeafe'
+    },
+    backBtn: {
+      marginTop: '18px',
+      padding: '10px 18px',
+      background: 'white',
+      color: '#172554',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: 'bold'
+    },
+    tabs: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '10px',
+      marginBottom: '25px'
+    },
+    tab: {
+      padding: '12px 20px',
+      border: 'none',
+      borderRadius: '7px',
+      cursor: 'pointer',
+      fontWeight: 'bold',
+      background: 'white',
+      color: '#24304a'
+    },
+    activeTab: {
+      background: '#2563eb',
+      color: 'white'
+    },
+    section: {
+      background: 'white',
+      padding: '25px',
+      borderRadius: '12px',
+      marginBottom: '20px',
+      boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
+    },
+    sectionTitle: {
+      fontSize: '22px',
+      marginTop: 0,
+      marginBottom: '20px'
+    },
+    card: {
+      border: '1px solid #e2e8f0',
+      borderRadius: '9px',
+      padding: '18px',
+      marginBottom: '15px'
+    },
+    cardTitle: {
+      margin: '0 0 10px',
+      color: '#1e3a8a',
+      fontSize: '18px'
+    },
+    description: {
+      color: '#64748b',
+      lineHeight: '1.6'
+    },
+    primaryBtn: {
+      padding: '11px 18px',
+      background: '#2563eb',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontWeight: 'bold',
+      marginBottom: '15px'
+    },
+    deleteBtn: {
+      padding: '9px 14px',
+      background: '#dc2626',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      marginTop: '10px'
+    },
+    submitBtn: {
+      padding: '9px 14px',
+      background: '#16a34a',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      marginTop: '10px',
+      marginRight: '10px'
+    },
+    input: {
+      width: '100%',
+      padding: '12px',
+      marginBottom: '14px',
+      border: '1px solid #cbd5e1',
+      borderRadius: '6px',
+      boxSizing: 'border-box',
+      fontSize: '14px'
+    },
+    form: {
+      background: '#f8fafc',
+      padding: '20px',
+      borderRadius: '9px',
+      marginBottom: '20px'
+    },
+    label: {
+      display: 'block',
+      marginBottom: '7px',
+      fontWeight: 'bold',
+      fontSize: '14px'
+    },
+    status: {
+      display: 'inline-block',
+      padding: '5px 10px',
+      borderRadius: '20px',
+      background: '#fef3c7',
+      color: '#92400e',
+      fontSize: '13px',
+      fontWeight: 'bold'
+    },
+    empty: {
+      color: '#64748b',
+      padding: '15px 0'
+    }
+  };
+
+  const tabButtonStyle = (tab) => ({
+    ...styles.tab,
+    ...(activeTab === tab ? styles.activeTab : {})
+  });
 
   return (
-    <div style={styles.container}>
+    <div style={styles.page}>
+      <div style={styles.container}>
 
-      {/* Header */}
-      <header style={styles.header}>
-        <div>
-          <h2 style={{ margin: 0, color: '#F2A900' }}>
-            👨‍🎓 Student Portal View
-          </h2>
+        {/* Header */}
+        <header style={styles.header}>
+          <h1 style={styles.heading}>Welcome, RVU Student!</h1>
+          <p style={styles.subtitle}>
+            Your Campus Connect Student Portal
+          </p>
 
-          <span style={{ fontSize: '13px', color: '#e0e0e0' }}>
-            Welcome, RVU Student
-          </span>
+          <button
+            style={styles.backBtn}
+            onClick={onBackToHome}
+          >
+            Back to Main Campus View
+          </button>
+        </header>
+
+        {/* Navigation Tabs */}
+        <div style={styles.tabs}>
+          <button
+            style={tabButtonStyle('notices')}
+            onClick={() => setActiveTab('notices')}
+          >
+            Notices & Events
+          </button>
+
+          <button
+            style={tabButtonStyle('assignments')}
+            onClick={() => setActiveTab('assignments')}
+          >
+            Assignments
+          </button>
+
+          <button
+            style={tabButtonStyle('attendance')}
+            onClick={() => setActiveTab('attendance')}
+          >
+            Track Attendance
+          </button>
+
+          <button
+            style={tabButtonStyle('profile')}
+            onClick={() => setActiveTab('profile')}
+          >
+            Profile
+          </button>
         </div>
 
-        <button onClick={onBackToHome} style={styles.backBtn}>
-          ← Back to Main Campus View
-        </button>
-      </header>
-
-      {/* Navigation Tabs */}
-      <div style={styles.tabContainer}>
-
-        <button
-          onClick={() => navigate('/student/notices')}
-          style={activePage === 'notices' ? styles.activeTab : styles.tab}
-        >
-          Notices & Events
-        </button>
-
-        <button
-          onClick={() => navigate('/student/assignments')}
-          style={activePage === 'assignments' ? styles.activeTab : styles.tab}
-        >
-          Assignments
-        </button>
-
-        <button
-          onClick={() => navigate('/student/attendance')}
-          style={activePage === 'attendance' ? styles.activeTab : styles.tab}
-        >
-          Track Attendance
-        </button>
-
-        <button
-          onClick={() => navigate('/student/profile')}
-          style={activePage === 'profile' ? styles.activeTab : styles.tab}
-        >
-          Profile
-        </button>
-
-      </div>
-
-      {/* Content Section */}
-      <div style={styles.contentCard}>
-
-        {/* Notices Section */}
-        {activePage === 'notices' && (
-          <div>
-            <h3>📢 Campus Notices & Events</h3>
-
-            {loadingNotices && <p>Loading notices...</p>}
-
-            {noticeError && (
-              <p style={styles.errorText}>{noticeError}</p>
-            )}
-
-            {!loadingNotices && !noticeError && notices.length === 0 && (
-              <p>No notices available.</p>
-            )}
-
-            {!loadingNotices && !noticeError && (
-              <ul style={styles.list}>
-                {notices.map((item) => (
-                  <li key={item._id} style={styles.listItem}>
-                    <div>
-                      <strong>{item.title}</strong>
-
-                      <p style={styles.subText}>
-                        {item.department} • {item.date}
-                      </p>
-
-                      <p style={styles.description}>
-                        {item.description}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+        {loading && (
+          <div style={styles.section}>
+            Loading portal data...
           </div>
         )}
 
-        {/* Assignments Section */}
-        {activePage === 'assignments' && (
-          <div>
-            <h3>📝 Assignments & Submissions</h3>
-
-            {loadingAssignments && <p>Loading assignments...</p>}
-
-            {assignmentError && (
-              <p style={styles.errorText}>{assignmentError}</p>
-            )}
-
-            {!loadingAssignments &&
-              !assignmentError &&
-              assignments.length === 0 && (
-                <p>No assignments available yet.</p>
-              )}
-
-            {!loadingAssignments && !assignmentError && (
-              <ul style={styles.list}>
-                {assignments.map((item) => (
-                  <li key={item._id} style={styles.listItem}>
-                    <div>
-                      <strong>{item.title}</strong>
-
-                      <p style={styles.subText}>
-                        {item.subject} • Due: {item.dueDate}
-                      </p>
-
-                      <p style={styles.description}>
-                        {item.description}
-                      </p>
-                    </div>
-
-                    {item.status === 'Submitted' ? (
-                      <span style={styles.badgeSuccess}>
-                        Submitted
-                      </span>
-                    ) : (
-                      <button
-                        style={styles.actionBtn}
-                        onClick={() => handleAssignmentSubmit(item._id)}
-                      >
-                        Submit Assignment
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
+        {error && (
+          <div style={styles.section}>
+            <p style={{ color: '#dc2626' }}>{error}</p>
+            <button
+              style={styles.primaryBtn}
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </button>
           </div>
         )}
 
-        {/* Attendance Section */}
-        {activePage === 'attendance' && (
-          <div>
-            <h3>📊 Attendance Tracker</h3>
+        {/* Notices Tab */}
+        {!loading && activeTab === 'notices' && (
+          <section style={styles.section}>
+            <h2 style={styles.sectionTitle}>Notices & Events</h2>
 
-            <div style={styles.grid}>
-              <div style={styles.metricCard}>
-                <h4>CS3301 - Full Stack</h4>
-                <p style={styles.metricText}>88% Attendance</p>
+            <button
+              style={styles.primaryBtn}
+              onClick={() => setShowNoticeForm(!showNoticeForm)}
+            >
+              {showNoticeForm ? 'Cancel' : '+ Add New Notice'}
+            </button>
+
+            {showNoticeForm && (
+              <form style={styles.form} onSubmit={handleAddNotice}>
+                <h3>Add Notice</h3>
+
+                <label style={styles.label}>Notice Title</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Enter notice title"
+                  value={noticeForm.title}
+                  onChange={(e) =>
+                    setNoticeForm({ ...noticeForm, title: e.target.value })
+                  }
+                  required
+                />
+
+                <label style={styles.label}>Description</label>
+                <textarea
+                  style={styles.input}
+                  placeholder="Enter notice description"
+                  value={noticeForm.description}
+                  onChange={(e) =>
+                    setNoticeForm({
+                      ...noticeForm,
+                      description: e.target.value
+                    })
+                  }
+                  required
+                />
+
+                <label style={styles.label}>Department</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Enter department"
+                  value={noticeForm.department}
+                  onChange={(e) =>
+                    setNoticeForm({
+                      ...noticeForm,
+                      department: e.target.value
+                    })
+                  }
+                  required
+                />
+
+                <label style={styles.label}>Date</label>
+                <input
+                  style={styles.input}
+                  type="date"
+                  value={noticeForm.date}
+                  onChange={(e) =>
+                    setNoticeForm({ ...noticeForm, date: e.target.value })
+                  }
+                  required
+                />
+
+                <button
+                  style={styles.primaryBtn}
+                  type="submit"
+                  disabled={saving}
+                >
+                  {saving ? 'Adding...' : 'Save Notice'}
+                </button>
+              </form>
+            )}
+
+            {notices.length === 0 ? (
+              <p style={styles.empty}>No notices available.</p>
+            ) : (
+              notices.map((notice) => (
+                <div style={styles.card} key={notice._id}>
+                  <h3 style={styles.cardTitle}>{notice.title}</h3>
+                  <p style={styles.description}>{notice.description}</p>
+                  <p><strong>Department:</strong> {notice.department}</p>
+                  <p><strong>Date:</strong> {notice.date}</p>
+
+                  <button
+                    style={styles.deleteBtn}
+                    onClick={() => handleDeleteNotice(notice._id)}
+                  >
+                    Remove Notice
+                  </button>
+                </div>
+              ))
+            )}
+          </section>
+        )}
+
+        {/* Assignments Tab */}
+        {!loading && activeTab === 'assignments' && (
+          <section style={styles.section}>
+            <h2 style={styles.sectionTitle}>My Assignments</h2>
+
+            <button
+              style={styles.primaryBtn}
+              onClick={() =>
+                setShowAssignmentForm(!showAssignmentForm)
+              }
+            >
+              {showAssignmentForm ? 'Cancel' : '+ Add Assignment'}
+            </button>
+
+            {showAssignmentForm && (
+              <form
+                style={styles.form}
+                onSubmit={handleAddAssignment}
+              >
+                <h3>Add Assignment</h3>
+
+                <label style={styles.label}>Assignment Title</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Enter assignment title"
+                  value={assignmentForm.title}
+                  onChange={(e) =>
+                    setAssignmentForm({
+                      ...assignmentForm,
+                      title: e.target.value
+                    })
+                  }
+                  required
+                />
+
+                <label style={styles.label}>Subject</label>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Enter subject"
+                  value={assignmentForm.subject}
+                  onChange={(e) =>
+                    setAssignmentForm({
+                      ...assignmentForm,
+                      subject: e.target.value
+                    })
+                  }
+                  required
+                />
+
+                <label style={styles.label}>Description</label>
+                <textarea
+                  style={styles.input}
+                  placeholder="Enter assignment description"
+                  value={assignmentForm.description}
+                  onChange={(e) =>
+                    setAssignmentForm({
+                      ...assignmentForm,
+                      description: e.target.value
+                    })
+                  }
+                  required
+                />
+
+                <label style={styles.label}>Due Date</label>
+                <input
+                  style={styles.input}
+                  type="date"
+                  value={assignmentForm.dueDate}
+                  onChange={(e) =>
+                    setAssignmentForm({
+                      ...assignmentForm,
+                      dueDate: e.target.value
+                    })
+                  }
+                  required
+                />
+
+                <button
+                  style={styles.primaryBtn}
+                  type="submit"
+                  disabled={saving}
+                >
+                  {saving ? 'Adding...' : 'Save Assignment'}
+                </button>
+              </form>
+            )}
+
+            {assignments.length === 0 ? (
+              <p style={styles.empty}>No assignments available.</p>
+            ) : (
+              assignments.map((assignment) => (
+                <div style={styles.card} key={assignment._id}>
+                  <h3 style={styles.cardTitle}>{assignment.title}</h3>
+                  <p><strong>Subject:</strong> {assignment.subject}</p>
+                  <p style={styles.description}>
+                    {assignment.description}
+                  </p>
+                  <p><strong>Due Date:</strong> {assignment.dueDate}</p>
+
+                  <p>
+                    <strong>Status: </strong>
+                    <span style={styles.status}>
+                      {assignment.status || 'Pending'}
+                    </span>
+                  </p>
+
+                  {assignment.status !== 'Submitted' && (
+                    <button
+                      style={styles.submitBtn}
+                      onClick={() =>
+                        handleSubmitAssignment(assignment._id)
+                      }
+                    >
+                      Submit Assignment
+                    </button>
+                  )}
+
+                  <button
+                    style={styles.deleteBtn}
+                    onClick={() =>
+                      handleDeleteAssignment(assignment._id)
+                    }
+                  >
+                    Remove Assignment
+                  </button>
+                </div>
+              ))
+            )}
+          </section>
+        )}
+
+        {/* Attendance Tab */}
+        {activeTab === 'attendance' && (
+          <section style={styles.section}>
+            <h2 style={styles.sectionTitle}>Track Attendance</h2>
+
+            <div style={styles.card}>
+              <h3 style={styles.cardTitle}>Attendance Overview</h3>
+              <p><strong>Course:</strong> BSc Computer Science</p>
+              <p><strong>Department:</strong> SOCSE</p>
+              <p><strong>Attendance:</strong> 85%</p>
+
+              <div
+                style={{
+                  width: '100%',
+                  height: '12px',
+                  background: '#e2e8f0',
+                  borderRadius: '10px',
+                  overflow: 'hidden'
+                }}
+              >
+                <div
+                  style={{
+                    width: '85%',
+                    height: '100%',
+                    background: '#16a34a'
+                  }}
+                />
               </div>
 
-              <div style={styles.metricCard}>
-                <h4>CS3302 - DBMS</h4>
-                <p style={styles.metricText}>92% Attendance</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Profile Section */}
-        {activePage === 'profile' && (
-          <div>
-            <h3>👤 Student Profile</h3>
-
-            <div style={{ textAlign: 'left', lineHeight: '1.8' }}>
-              <p><strong>Name:</strong> RVU Student</p>
-
-              <p>
-                <strong>Department:</strong> School of Computer Science & Engineering (SOCSE)
+              <p style={styles.description}>
+                Your attendance is above the required 75%.
               </p>
-
-              <p><strong>Course:</strong> CS3301 - Full Stack Development</p>
-
-              <p><strong>Status:</strong> Active Enrolled</p>
             </div>
-          </div>
+          </section>
+        )}
+
+        {/* Profile Tab */}
+        {activeTab === 'profile' && (
+          <section style={styles.section}>
+            <h2 style={styles.sectionTitle}>Student Profile</h2>
+
+            <div style={styles.card}>
+              <h3 style={styles.cardTitle}>Student Information</h3>
+              <p><strong>Name:</strong> Bhumika R</p>
+              <p><strong>USN:</strong> 1RUA24SCS0018</p>
+              <p><strong>University:</strong> RV University</p>
+              <p><strong>School:</strong> School of Computer Science & Engineering</p>
+              <p><strong>Course:</strong> BSc Computer Science</p>
+            </div>
+          </section>
         )}
 
       </div>
     </div>
   );
 }
-
-
-// RVU University Styling
-const styles = {
-  container: {
-    maxWidth: '850px',
-    margin: '30px auto',
-    fontFamily: 'Arial, sans-serif'
-  },
-
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#0A2240',
-    padding: '15px 20px',
-    borderRadius: '8px 8px 0 0',
-    color: '#fff'
-  },
-
-  backBtn: {
-    backgroundColor: '#F2A900',
-    border: 'none',
-    padding: '8px 14px',
-    fontWeight: 'bold',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    color: '#0A2240'
-  },
-
-  tabContainer: {
-    display: 'flex',
-    backgroundColor: '#e0e0e0',
-    borderBottom: '2px solid #0A2240'
-  },
-
-  tab: {
-    flex: 1,
-    padding: '12px',
-    border: 'none',
-    background: 'none',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    color: '#333'
-  },
-
-  activeTab: {
-    flex: 1,
-    padding: '12px',
-    border: 'none',
-    backgroundColor: '#ffffff',
-    color: '#0A2240',
-    fontWeight: 'bold',
-    borderTop: '3px solid #0A2240',
-    cursor: 'pointer'
-  },
-
-  contentCard: {
-    backgroundColor: '#ffffff',
-    padding: '25px',
-    borderRadius: '0 0 8px 8px',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-    minHeight: '200px'
-  },
-
-  list: {
-    listStyle: 'none',
-    padding: 0
-  },
-
-  listItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: '15px',
-    padding: '12px',
-    borderBottom: '1px solid #eee'
-  },
-
-  subText: {
-    margin: '4px 0 0 0',
-    fontSize: '12px',
-    color: '#666'
-  },
-
-  description: {
-    marginTop: '8px',
-    fontSize: '14px',
-    color: '#444'
-  },
-
-  actionBtn: {
-    backgroundColor: '#0A2240',
-    color: '#fff',
-    border: 'none',
-    padding: '6px 12px',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-
-  badgeSuccess: {
-    backgroundColor: '#28a745',
-    color: '#fff',
-    padding: '4px 8px',
-    borderRadius: '4px',
-    fontSize: '12px'
-  },
-
-  errorText: {
-    color: 'red',
-    fontSize: '14px'
-  },
-
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: '15px'
-  },
-
-  metricCard: {
-    border: '1px solid #ddd',
-    padding: '15px',
-    borderRadius: '6px',
-    textAlign: 'center'
-  },
-
-  metricText: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#0A2240'
-  }
-};
