@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000/api';
+// Deployed Render Backend URL
+const API_URL = 'https://campus-connect-portal-2205.onrender.com/api';
 
 export default function StudentPortal({ onBackToHome }) {
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function StudentPortal({ onBackToHome }) {
   const [noticeError, setNoticeError] = useState('');
   const [assignmentError, setAssignmentError] = useState('');
 
-  // Fetch notices from MongoDB
+  // Fetch notices from MongoDB Atlas
   useEffect(() => {
     const fetchNotices = async () => {
       try {
@@ -39,7 +40,7 @@ export default function StudentPortal({ onBackToHome }) {
     fetchNotices();
   }, []);
 
-  // Fetch assignments from MongoDB
+  // Fetch assignments from MongoDB Atlas
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
