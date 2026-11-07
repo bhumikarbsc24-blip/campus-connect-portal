@@ -95,9 +95,10 @@
             </div>
         </div>
 
+        <!-- Corrected Login and Register Navigation -->
         <div class="nav-actions">
-            <a href="login.html" class="btn-secondary">Login</a>
-            <a href="login.html#register" class="btn-primary">Register</a>
+            <a href="#login" class="btn-secondary">Login</a>
+            <a href="#register" class="btn-primary">Register</a>
         </div>
 
     </header>
@@ -218,7 +219,7 @@
                 </ul>
 
                 <button class="btn-portal student-bg"
-                    onclick="window.location.href='login.html'">
+                    onclick="window.location.hash = '#login'">
                     Access Student View
                 </button>
             </article>
@@ -236,7 +237,7 @@
                 </ul>
 
                 <button class="btn-portal faculty-bg"
-                    onclick="window.location.href='login.html'">
+                    onclick="window.location.hash = '#login'">
                     Access Faculty View
                 </button>
             </article>
@@ -254,7 +255,7 @@
                 </ul>
 
                 <button class="btn-portal admin-bg"
-                    onclick="window.location.href='login.html'">
+                    onclick="window.location.hash = '#login'">
                     Access Admin View
                 </button>
             </article>
@@ -275,7 +276,6 @@
             Discover different clubs and connect with your interests.
         </p>
 
-        <!-- Clubs Display -->
         <div class="roles-grid" id="clubList">
             Loading clubs...
         </div>
@@ -380,7 +380,8 @@
     <!-- Backend CRUD API Integration -->
     <script>
 
-        const API_URL = "http://localhost:5000/clubs";
+        // Deployed Render backend URL
+        const API_URL = "https://campus-connect-portal-2205.onrender.com/clubs";
 
         // GET: Load all clubs
         async function loadClubs() {
@@ -406,7 +407,6 @@
 
                 clubs.forEach(club => {
 
-                    // Skip invalid entries
                     if (!club || club.id == null || !club.name || !club.description) {
                         return;
                     }
@@ -457,7 +457,7 @@
             } catch (error) {
 
                 clubList.innerText =
-                    "Unable to load clubs. Please start the backend server.";
+                    "Unable to load clubs. Please check the backend server.";
 
                 console.error(error);
 
@@ -652,8 +652,9 @@
     </script>
 
 
-    <!-- Existing React Application -->
+    <!-- React Application -->
     <script type="module" src="./src/main.jsx"></script>
 
 </body>
+
 </html>
